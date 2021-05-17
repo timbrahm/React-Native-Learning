@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Alert } from "react-native";
+import { View, StyleSheet, Alert, ScrollView, FlatList } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import Card from "../components/Card";
 import TitleText from "../components/TitleText";
+import BodyText from "../components/BodyText";
 import NumberContainer from "../components/NumberContainer";
 import MainButton from "../components/MainButton";
 
@@ -22,18 +24,17 @@ const generateRandomBetween = (min, max, exclude) => {
 const GameScreen = (props) => {
   const { userChoice, onRestart, onGameOver } = props;
 
-  const [currentGuess, setCurrentGuess] = useState(
-    generateRandomBetween(1, 100, userChoice)
-  );
+  const initialGuess = generateRandomBetween(1, 100, userChoice);
+  const [currentGuess, setCurrentGuess] = useState(initialGuess);
 
-  const [rounds, setRounds] = useState(0);
+  const [pastGuesses, setPastGuesses] = useState([initialGuess.toString()]);
 
   const currentLow = useRef(1);
   const currentHigh = useRef(100);
 
   useEffect(() => {
     if (currentGuess === userChoice) {
-      onGameOver(rounds);
+      onGameOver(pastGuesses.length);
     }
   }, [currentGuess, userChoice, onGameOver]);
 
@@ -50,15 +51,30 @@ const GameScreen = (props) => {
     if (direction === "lower") {
       currentHigh.current = currentGuess;
     } else {
-      currentLow.current = currentGuess;
+      currentLow.current = currentGuess + 1;
     }
     const nextNumber = generateRandomBetween(
-      currentLow.current + 1,
+      currentLow.current,
       currentHigh.current,
       currentGuess
     );
     setCurrentGuess(nextNumber);
-    setRounds((currRounds) => currRounds + 1);
+    // setRounds((currRounds) => currRounds + 1);
+    setPastGuesses((currPastGuesses) => [
+      nextNumber.toString(),
+      ...currPastGuesses,
+    ]);
+  };
+
+  const renderListItem = (listLen, itemData) => {
+    return (
+      <View style={styles.outerListItem}>
+        <Card style={styles.listItem}>
+          <BodyText>#{listLen - itemData.index}:</BodyText>
+          <BodyText>{itemData.item}</BodyText>
+        </Card>
+      </View>
+    );
   };
 
   return (
@@ -70,18 +86,34 @@ const GameScreen = (props) => {
           color={Colors.secondary}
           onPress={nextGuessHandler.bind(this, "lower")}
         >
-          LOWER
+          <Ionicons name="md-remove-sharp" size={24} color="white" />
         </MainButton>
         <MainButton
           color={Colors.primary}
           onPress={nextGuessHandler.bind(this, "greater")}
         >
-          GREATER
+          <Ionicons name="md-add-sharp" size={24} color="white" />
         </MainButton>
       </Card>
       <MainButton color={Colors.restart} onPress={onRestart}>
         RESTART
       </MainButton>
+      <View style={styles.prevGuessesContainer}>
+        <TitleText style={styles.prevGuesses}>Previous Guesses:</TitleText>
+      </View>
+      <View style={styles.listContainer}>
+        {/* <ScrollView contentContainerStyle={styles.list}>
+          {pastGuesses.map((guess, index) =>
+            renderListItem(guess, pastGuesses.length - index)
+          )}
+        </ScrollView> */}
+        <FlatList
+          keyExtractor={(item) => item}
+          data={pastGuesses}
+          renderItem={renderListItem.bind(this, pastGuesses.length)}
+          contentContainerStyle={styles.list}
+        />
+      </View>
     </View>
   );
 };
@@ -101,6 +133,36 @@ const styles = StyleSheet.create({
     width: 400,
     maxWidth: "90%",
     backgroundColor: "silver",
+  },
+  listItem: {
+    padding: 15,
+    marginVertical: 10,
+    backgroundColor: "silver",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "60%",
+  },
+  outerListItem: {
+    width: "100%",
+    alignItems: "center",
+  },
+  list: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
+  },
+  listContainer: {
+    width: "60%",
+    flex: 1,
+    marginBottom: 55,
+  },
+  prevGuesses: {
+    marginTop: 20,
+    fontSize: 16,
+    color: Colors.secondary,
+  },
+  prevGuessesContainer: {
+    borderBottomColor: "black",
+    borderBottomWidth: 1,
   },
 });
 

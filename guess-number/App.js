@@ -73,7 +73,7 @@ export default function App() {
   return (
     <View style={styles.screen}>
       <StatusBar style="auto" />
-      <Header title="Guess a Number vs. a SuperModel!" />
+      <Header title="Guess a Number vs. SuperModel!" />
       {content}
     </View>
   );
