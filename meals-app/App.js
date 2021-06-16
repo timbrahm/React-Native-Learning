@@ -1,10 +1,16 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import * as Font from "expo-font";
 import AppLoading from "expo-app-loading";
+import { enableScreens } from "react-native-screens";
 
 import MealsNavigator from "./navigation/MealsNavigator";
+
+import { LogBox } from "react-native";
+LogBox.ignoreLogs(["Warning: ...", "interpolate()"]); // Ignore log notification by message
+LogBox.ignoreAllLogs(); //Ignore all log notifications
+
+enableScreens();
 
 const fetchFonts = () => {
   return Font.loadAsync({
@@ -28,12 +34,3 @@ export default function App() {
 
   return <MealsNavigator />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
