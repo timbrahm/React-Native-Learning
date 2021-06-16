@@ -56,6 +56,7 @@ CategoriesScreen.navigationOptions = (navData) => {
 
 const styles = StyleSheet.create({
   screen: {
+    height: "100%",
     backgroundColor: "silver",
   },
 });
