@@ -98,16 +98,19 @@ const AuthScreen: NavComponent = (props) => {
       );
     }
 
+    let authCheck = false;
     try {
       setError(null);
       setIsLoading(true);
       await dispatch(action);
+      authCheck = true;
     } catch (err) {
       setError(err.message);
     }
     setIsLoading(false);
-
-    props.navigation.navigate("Shop");
+    if (authCheck) {
+      props.navigation.navigate("Shop");
+    }
   };
 
   const inputChangeHandler = useCallback(

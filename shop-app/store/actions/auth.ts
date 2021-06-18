@@ -3,11 +3,20 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const AUTHENTICATE = "AUTHENTICATE";
 export const LOGOUT = "LOGOUT";
 
-export const authenticate = (userId: string, token: string) => {
-  return {
-    type: AUTHENTICATE,
-    userId: userId,
-    token: token,
+let timer: any;
+
+export const authenticate = (
+  userId: string,
+  token: string,
+  expiryTime: number
+) => {
+  return (dispatch: Function) => {
+    dispatch(setLogoutTimer(expiryTime));
+    dispatch({
+      type: AUTHENTICATE,
+      userId: userId,
+      token: token,
+    });
   };
 };
 
@@ -35,6 +44,8 @@ export const signUp = (email: string, password: string) => {
 
       if (errorId === "EMAIL_EXISTS") {
         message = "This email already exists!";
+      } else if (errorId.includes("WEAK_PASSWORD")) {
+        message = "Password too weak! Should be at least 6 characters.";
       }
 
       throw new Error(message);
@@ -42,7 +53,13 @@ export const signUp = (email: string, password: string) => {
 
     const resData = await response.json();
 
-    dispatch(authenticate(resData.localId, resData.idToken));
+    dispatch(
+      authenticate(
+        resData.localId,
+        resData.idToken,
+        parseInt(resData.expiresIn) * 1000
+      )
+    );
     const expirationDate = new Date(
       new Date().getTime() + parseInt(resData.expiresIn) * 1000
     );
@@ -83,7 +100,13 @@ export const logIn = (email: string, password: string) => {
 
     const resData = await response.json();
 
-    dispatch(authenticate(resData.localId, resData.idToken));
+    dispatch(
+      authenticate(
+        resData.localId,
+        resData.idToken,
+        parseInt(resData.expiresIn) * 1000
+      )
+    );
     const expirationDate = new Date(
       new Date().getTime() + parseInt(resData.expiresIn) * 1000
     );
@@ -92,7 +115,23 @@ export const logIn = (email: string, password: string) => {
 };
 
 export const logout = () => {
+  clearLogoutTimer();
+  AsyncStorage.removeItem("userData");
   return { type: LOGOUT };
+};
+
+const clearLogoutTimer = () => {
+  if (timer) {
+    clearTimeout(timer);
+  }
+};
+
+const setLogoutTimer = (expirationTime: number) => {
+  return (dispatch: Function) => {
+    timer = setTimeout(() => {
+      dispatch(logout());
+    }, expirationTime);
+  };
 };
 
 const saveDataToStorage = (
