@@ -1,0 +1,12 @@
+{
+  "name": "native-device-features",
+  "displayName": "native-device-features",
+  "expo": {
+    "name": "native-device-features",
+    "slug": "native-device-features",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
