@@ -5,6 +5,7 @@ import {
   Text,
   TextInput,
   View,
+  Alert,
   Button,
 } from "react-native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -15,9 +16,17 @@ import { PlacesStackParamList } from "../navigation/PlacesNavigator";
 import Colors from "../constants/Colors";
 import * as placesActions from "../store/places-action";
 import ImageSelector from "../components/ImageSelector";
+import LocationSelector from "../components/LocationSelector";
+
+type PickedLocation = {
+  lat: number;
+  lng: number;
+};
 
 type State = {
   titleValue: string;
+  pickedLocation: PickedLocation | undefined;
+  selectedImage: string;
 };
 
 const mapDispatch = {
@@ -39,7 +48,15 @@ interface Props extends PropsFromRedux {
 class NewPlaceScreen extends Component<Props, State> {
   state: State = {
     titleValue: "",
+    selectedImage: "",
+    pickedLocation: undefined,
   };
+
+  imageTakenHandler(imagePath: string) {
+    this.setState({
+      selectedImage: imagePath,
+    });
+  }
 
   titleChangeHandler = (text: string) => {
     this.setState({
@@ -47,10 +64,24 @@ class NewPlaceScreen extends Component<Props, State> {
     });
   };
 
-  savePlaceHandler = () => {
-    this.props.addPlace(this.state.titleValue);
-    this.props.navigation.goBack();
+  savePlaceHandler = async () => {
+    try {
+      await this.props.addPlace(
+        this.state.titleValue,
+        this.state.selectedImage,
+        this.state.pickedLocation
+      );
+      this.props.navigation.goBack();
+    } catch (err) {
+      Alert.alert("Save Place Error!", err.message, [{ text: "Ok" }]);
+    }
   };
+
+  locationPickedHandler(location: any) {
+    this.setState({
+      pickedLocation: location,
+    });
+  }
 
   render() {
     return (
@@ -62,7 +93,12 @@ class NewPlaceScreen extends Component<Props, State> {
             value={this.state.titleValue}
             onChangeText={this.titleChangeHandler}
           />
-          <ImageSelector />
+          <ImageSelector onImageTaken={this.imageTakenHandler.bind(this)} />
+          <LocationSelector
+            onLocationPicked={this.locationPickedHandler.bind(this)}
+            navigation={this.props.navigation}
+            navigationParams={this.props.route.params}
+          />
           <Button
             title="Save Place"
             color={Colors.primary}

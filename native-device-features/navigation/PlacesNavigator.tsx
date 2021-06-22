@@ -13,11 +13,24 @@ import Colors from "../constants/Colors";
 export type PlacesStackParamList = {
   Places: undefined;
   PlaceDetail: {
-    placeTitle: string;
     placeId: any;
+    placeTitle: string;
+    imageUrl: string;
+    address: string;
+    lat: number;
+    lng: number;
   };
-  NewPlace: undefined;
-  Map: undefined;
+  NewPlace: {
+    pickedLocation?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  Map: {
+    readOnly?: Boolean;
+    initialLat?: number;
+    initialLng?: number;
+  };
 };
 
 const Stack = createStackNavigator<PlacesStackParamList>();
