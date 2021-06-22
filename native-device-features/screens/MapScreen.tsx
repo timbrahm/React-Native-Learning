@@ -38,7 +38,7 @@ class MapScreen extends Component<Props, State> {
         }
       : null;
 
-  mapRegion =
+  mapRegion: any =
     this.navigationParams.initialLat !== null
       ? {
           latitude: this.navigationParams.initialLat,
